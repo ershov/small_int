@@ -63,8 +63,8 @@ def bit_decode_small_posints(data: bytes, count: int) -> list[int]:
         nonlocal n, shift
         val = chunk & 0b0111  # Get the last 3 bits
         if shift:
-            val += 1
-        n += val << shift  # Use "+" rather than "|", since we can carry bits from "+1"
+            val = (val + 1) << shift
+        n += val  # Use "+" rather than "|", since we can carry bits from "+1"
         shift += 3
         return bool(chunk & 0b1000)
 
