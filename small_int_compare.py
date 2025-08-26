@@ -15,15 +15,19 @@ Outputs tabular sections with columns:
 from __future__ import annotations
 
 from small_int8 import bit_encode_small_unsigned as enc8
+from small_int8_proto import bit_encode_small_unsigned as enc8proto
+from small_int8_wt import bit_encode_small as enc8wt
 from small_int4 import bit_encode_small_unsigned as enc4
-from small_int4_rle1 import bit_encode_small_unsigned as encrle1
+from small_int4_rle1 import bit_encode_small_unsigned as enc4rle1
 from small_int1 import bit_encode_small_unsigned as enc1
 
 # Keep encoder list in required order
 ENCODERS = [
     ("8bit", enc8),
+    ("8proto", enc8proto),
+    ("8wt", enc8wt),
     ("4bit", enc4),
-    ("4bit_rle", encrle1),
+    ("4rle", enc4rle1),
     ("2bit", enc1),
 ]
 
