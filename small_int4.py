@@ -110,6 +110,19 @@ if __name__ == "__main__":
         print(f"{i:<10} {encoded.hex(' '):<20} {' '.join(f'{b:08b}' for b in encoded):<20} {decoded:<20}")
         assert decoded == i, f"Decoded value {decoded} does not match original {i}"
 
+    print(f"\n    Unsigned integers (exponent)\n{'Number':<10} {'Hex':<40} {'Bin':<64}  {'Decoded'}")
+    for ii in range(64):
+        i = 1 << ii
+        enc = bit_encode_small_unsigned([i])
+        dec = bit_decode_small_unsigned(enc, 1)[0]
+        print(f"{i:<10} {enc.hex(' '):<40} {' '.join(f'{b:08b}' for b in enc):<64}  {dec}")
+        assert dec == i, (i, dec, enc.hex())
+    i = (1 << 64) - 1
+    enc = bit_encode_small_unsigned([i])
+    dec = bit_decode_small_unsigned(enc, 1)[0]
+    print(f"{i:<10} {enc.hex(' '):<40} {' '.join(f'{b:08b}' for b in enc):<64}  {dec}")
+    assert dec == i, (i, dec, enc.hex())
+
     # Two small unsigned integers
     print(f"\n    Pairs of integers\n{'Array':<15} {'Decoded':<15} {'Len':<8} {'Hex':<10} {'Bin':<16}")
     for i in range(0, 11):

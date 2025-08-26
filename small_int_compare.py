@@ -11,12 +11,6 @@ Encoders compared (order fixed):
 Outputs tabular sections with columns:
   Array | For each encoder: <len> <hex-bytes>
 
-Test sections:
-  * Single numbers 0..150
-  * Single array of 100 numbers with step 50
-  * Arrays of small numbers (length 1..10)
-  * Arrays of mixed numbers (small + big) up to 10 items
-  * Pattern arrays: [0, 0, big, 0, big, medium, medium] (several big/medium variants)
 """
 from __future__ import annotations
 
@@ -33,6 +27,13 @@ ENCODERS = [
     ("2bit", enc1),
 ]
 
+def truncate(s: str, max_len: int) -> str:
+    if len(s) <= max_len:
+        return s
+    if max_len < 4:
+        return s[:max_len]
+    return s[: max_len - 3] + "..."
+
 def hex_dump(b: bytes) -> str:
     return b.hex(" ")
 
@@ -44,76 +45,92 @@ def encode_all(arr: list[int]):
     return out
 
 def print_header(title: str):
-    print(f"\n=== {title} ===")
-    # Dynamic column widths
-    encoder_headers = " | ".join(f"   {name:<20} (len: hex)" for name, _ in ENCODERS)
-    print(f"{'Array':<40} | {encoder_headers}")
-    print("-" * (40 + 3 + len(encoder_headers)))
+    # print(f"\n=== {title} ===")
+    # encoder_headers = " | ".join(f"   {name:<20} (len: hex)" for name, _ in ENCODERS)
+    # print(f"{'Array':<40} | {encoder_headers}")
+    # print("-" * (40 + 3 + len(encoder_headers)))
+    encoder_headers = " | ".join(f" {name:<9}" for name, _ in ENCODERS)
+    title = f"=== {title} ==="
+    print(f"\n{title:<80} | {encoder_headers}")
+    print("-" * (80 + 3 + len(encoder_headers)))
 
-def print_row(arr: list[int]):
+def print_row(arr: list[int], full: bool = True):
+    # encs = encode_all(arr)
+    # row = str(arr)
+    # if full and len(row) > 38:
+    #     print(arr)
+    #     row = ""
+    # else:
+    #     row = truncate(row, 38)
+    # row = f"{row:<40} | "
+    # pieces = []
+    # for name, length, hx in encs:
+    #     pieces.append(f"{length:>3}: {truncate(hx, 29)}")
+    # print(row + " | ".join(f"{p:<34}" for p in pieces))
     encs = encode_all(arr)
-    # Shorten very long array repr
-    arr_repr = str(arr)
-    if len(arr_repr) > 38:
-        arr_repr = arr_repr[:35] + "..."
-    row = f"{arr_repr:<40} | "
+    row = str(arr)
+    if full and len(row) > 78:
+        print(arr)
+        row = ""
+    else:
+        row = truncate(row, 78)
+    row = f"{row:<80} : "
     pieces = []
     for name, length, hx in encs:
-        pieces.append(f"{length:>3}: {hx}")
-    print(row + " | ".join(f"{p:<34}" for p in pieces))
+        pieces.append(f"{length:>5}")
+    print(row + " : ".join(f"{p:<10}" for p in pieces))
 
 if __name__ == "__main__":
-    # 1. Single numbers 0..150
-    print_header("Single numbers 0..150")
+    import random
+    random.seed(876543)
+
+    print_header("Single numbers")
     for n in range(0, 151):
         print_row([n])
 
-    # 2. Array of 100 numbers with step 50
-    print_header("Array: 100 numbers with step 50")
-    step_array = [i * 50 for i in range(100)]
-    print_row(step_array)
+    print_header("Single numbers exponential")
+    for n in range(0, 65):
+        print_row([(1 << n)-1])
+    # print_row([(1 << 64) - 1])
 
-    # 3. Arrays of small numbers up to 10 items (use 0..k-1)
-    print_header("Arrays of small numbers (length 1..10)")
-    for k in range(1, 11):
+    print_header("4 numbers exponential")
+    for n in range(0, 65):
+        print_row([(1 << n)-1]*4, full=False)
+    # print_row([(1 << 64) - 1]*4, full=False)
+
+    print_header("Array: rather small random numbers")
+    for _ in range(20):
+        row = [random.randint(0, 1 << random.randint(0, 1 << random.randint(0, 5))) for _ in range(10)];
+        print_row(row, full=True)
+
+    print_header("Array: rather bigger random numbers")
+    for _ in range(20):
+        row = [random.randint(0, 1 << random.randint(0, 32)) for _ in range(10)];
+        print_row(row, full=True)
+
+    print_header("Arrays of small numbers")
+    for k in range(1, 21):
         print_row(list(range(k)))
 
-    # 4. Arrays of mixed numbers (small + big) up to 10 items.
-    # Define some boundary / larger values that exercise different length tiers.
-    BIG_VALUES = [
-        293,            # near small_int1 Form4 upper
-        4389,           # near Form5 upper
-        69925,          # near Form6 upper
-        594213,         # near Form7 upper
-        594214,         # first Form8/raw value in small_int1
-        528967,         # near small_int4_rle1 k=4 upper
-        528968,         # small_int4_rle1 raw boundary
-        (1 << 32) - 1,  # 32-bit max
-        (1 << 40) + 12345,
-        (1 << 56) + 7,
-    ]
-    print_header("Mixed number arrays (length 2..10)")
-    # Build arrays by interleaving small and big numbers
-    for k in range(2, 11):
-        arr = []
-        bi = 0
-        si = 0
-        while len(arr) < k:
-            if len(arr) % 2 == 0:
-                arr.append(si)
-                si += 1
-            else:
-                arr.append(BIG_VALUES[bi % len(BIG_VALUES)])
-                bi += 1
-        print_row(arr)
+    print_header("Mixed number arrays")
+    for k in range(1, 11):
+        arr = [*sum(zip(
+                [int(random.paretovariate(2)) for _ in range(k)],
+                [random.randint(0, random.getrandbits(random.randint(0, 32))) for _ in range(k)]), ())]
+        print_row(arr, full=True)
+        arr = [*sum(zip(
+                [int(random.paretovariate(2)) for _ in range(k)],
+                [random.getrandbits(random.randint(0, 32)) for _ in range(k)]), ())]
+        print_row(arr, full=True)
 
-    # 5. Pattern arrays: [0,0,big,0,big,medium,medium]
-    print_header("Pattern arrays [0,0,big,0,big,medium,medium]")
-    PATTERNS = [
-        ( (1<<32) + 123, 50000 ),
-        ( (1<<40) + 999, 528968 ),
-        ( (1<<56) + 777, 69925 ),
-    ]
-    for big, med in PATTERNS:
-        arr = [0,0,big,0,big,med,med]
-        print_row(arr)
+    print_header("Pattern arrays [0,0,big,small,big,mediumsmall,medium]")
+    for _ in range(30):
+        arr = [0,
+               0,
+               abs(int(random.gauss(mu=100000, sigma=100000))),
+               random.randint(0, 8),
+               abs(int(random.gauss(mu=100000, sigma=100000))),
+               int(random.expovariate(0.05)),
+               int(4096 * random.paretovariate(2)),
+               ]
+        print_row(arr, full=True)

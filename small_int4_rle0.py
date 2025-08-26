@@ -268,6 +268,19 @@ if __name__ == "__main__":
         print(f"{i:<10} {enc.hex(' '):<20} {' '.join(f'{b:08b}' for b in enc):<30}  {dec}")
         assert dec == i, (i, dec, enc.hex())
 
+    print(f"\n    Unsigned integers (exponent)\n{'Number':<10} {'Hex':<40} {'Bin':<64}  {'Decoded'}")
+    for ii in range(64):
+        i = 1 << ii
+        enc = bit_encode_small_unsigned([i])
+        dec = bit_decode_small_unsigned(enc, 1)[0]
+        print(f"{i:<10} {enc.hex(' '):<40} {' '.join(f'{b:08b}' for b in enc):<64}  {dec}")
+        assert dec == i, (i, dec, enc.hex())
+    i = (1 << 64) - 1
+    enc = bit_encode_small_unsigned([i])
+    dec = bit_decode_small_unsigned(enc, 1)[0]
+    print(f"{i:<10} {enc.hex(' '):<40} {' '.join(f'{b:08b}' for b in enc):<64}  {dec}")
+    assert dec == i, (i, dec, enc.hex())
+
     # Boundary tests around each shift
     print("\nBoundary test cases:")
     print(f"{'Value':<22} {'Hex':<30}   {'Bytes':<30} {'Decoded'}")
