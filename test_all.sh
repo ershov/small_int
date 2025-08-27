@@ -80,11 +80,11 @@ plot_graph() {
 
     if [[ "$bytes" -gt 0 ]]; then
         local PLOT_BYTES=1
-        local YTICS="$bytes"
+        local YTICS="set ytics 0,$bytes"
         local XAXIS="(\$0 / 8.0 * $bytes):"
     else
         local PLOT_BYTES=""
-        local YTICS=1
+        local YTICS="set ytics 0,1"
         local XAXIS=""
         local bytes=1
     fi
@@ -95,6 +95,7 @@ plot_graph() {
     fi
 
     local RANGE=$(max "$name.txt")
+    [[ "$RANGE" -gt 70 ]] && { RANGE=$((RANGE/3)); YTICS=""; }
     [[ "$RANGE" -gt 40 ]] && RANGE=40
 
     local PLOTS=""
@@ -113,10 +114,11 @@ plot_graph() {
     gnuplot -e "$title"'
 set xtics 0,1;
 set noxlabel;
-set ytics 0,'"$YTICS"';
+'"$YTICS"';
 set grid;
-set style line 99 lc rgb "#000000" lw 1;
+set key left reverse Left;
 '"$PALETTE"'
+set style line 99 lc rgb "#000000" lw 0.7;
 set terminal pngcairo size 1200,800 noenhanced font "Verdana,10";
 set output "'"$name"'.png";
 plot [0:] [0:] '"$PLOTS"';
@@ -137,7 +139,9 @@ extract_table_and_plot() {
 
 extract_table_and_plot 1 compare_1 "Single numbers exponential"
 extract_table_and_plot 4 compare_4 "4 numbers exponential"
-extract_table_and_plot 0 compare_a_pattern "Pattern arrays"
-extract_table_and_plot 0 compare_a_mix "Mixed number arrays"
+extract_table_and_plot 0 compare_a_pattern0 "Pattern random arrays0"
+extract_table_and_plot 0 compare_a_pattern1 "Pattern random arrays1"
+extract_table_and_plot 0 compare_a_mix "Mixed random number arrays"
+extract_table_and_plot 0 compare_a_interleave "Arrays of mixed numbers"
 extract_table_and_plot 0 compare_a_small "Array: rather small random numbers"
 extract_table_and_plot 0 compare_a_bigger "Array: rather bigger random numbers"

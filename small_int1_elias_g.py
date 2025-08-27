@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+
+###############################################################################
+# Elias Gamma integer codec (modified LSB-first tail variant)
+#
+# This variant still uses a unary run of 0 bits terminated by a 1 as the
+# delimiter (k zeros then 1, where k = floor(log2(n))). However, the trailing
+# k bits of n (after the leading 1) are emitted LSB-first instead of the
+# canonical MSB-first order. We also map v>=0 => n=v+1.
+#
+# Benefits: decoder can read tail with simple shift/mask (append bits as they
+# arrive), aligning with LSB-first byte packing already used. Not interoperable
+# with canonical Elias Gamma (different bit order for the tail field).
+###############################################################################
+
+from typing import List
+
+
+def bit_encode_small_unsigned(a: List[int]) -> bytes:
+    out = bytearray([0])
+    bit_pos = 0
+
+    def emit_bit(b: int):
+        nonlocal bit_pos
+        if b:
+            out[-1] |= (1 << bit_pos)
+        bit_pos += 1
+        if bit_pos == 8:
+            out.append(0)
+            bit_pos = 0
+
+    def emit_bits_lsb(value: int, n_bits: int):  # LSB-first
+        for i in range(n_bits):
+            emit_bit((value >> i) & 1)
+
+    for v in a:
+        if v < 0:
+            raise ValueError("Value must be non-negative")
+        n = v + 1
+        k = n.bit_length() - 1
+        for _ in range(k):  # unary zeros
+            emit_bit(0)
+        emit_bit(1)  # delimiter (implicit leading 1 of n)
+        if k:
+            tail = n & ((1 << k) - 1)
+            emit_bits_lsb(tail, k)  # LSB-first tail
+
+    if bit_pos == 0 and len(out) > 1:
+        out.pop()
+    return bytes(out)
+
+
+def bit_decode_small_unsigned(data: bytes, count: int) -> List[int]:
+    if count < 0:
+        raise ValueError("count must be non-negative")
+    res: List[int] = []
+    if count == 0:
+        return res
+    byte_len = len(data)
+    byte_index = 0
+    bit_pos = 0
+
+    def read_bit() -> int:
+        nonlocal byte_index, bit_pos
+        if byte_index >= byte_len:
+            raise ValueError("Unexpected end of data while reading bit")
+        b = (data[byte_index] >> bit_pos) & 1
+        bit_pos += 1
+        if bit_pos == 8:
+            bit_pos = 0
+            byte_index += 1
+        return b
+
+    while len(res) < count:
+        k = 0
+        while True:  # unary zeros
+            bit = read_bit()
+            if bit == 0:
+                k += 1
+                if k > 64:
+                    raise ValueError("Gamma code too long or malformed")
+            else:
+                break  # delimiter 1
+        if k == 0:
+            n = 1
+        else:
+            tail = 0
+            for i in range(k):  # LSB-first reconstruction
+                tail |= read_bit() << i
+            n = (1 << k) | tail
+        res.append(n - 1)
+    return res
+
+###############################################################################
+# Tests (updated expected bit lengths accordingly; logical length still 2k+1)
+
+from zigzag import encode_signed_as_unsigned, decode_unsigned_as_signed
+
+if __name__ == "__main__":
+    import random
+    MAX_V = (1 << 64) - 1
+    print(f"\n    Unsigned integers (first 200)\n{'Number':<10} {'Hex':<15} {'Bytes':<15} {'Decoded':<10} {'Bin'}")
+    for i in range(200):
+        enc = bit_encode_small_unsigned([i])
+        dec = bit_decode_small_unsigned(enc, 1)[0]
+        print(f"{i:<10} {enc.hex(' '):<15} {' '.join(f'{b:02x}' for b in enc):<15} {dec:<10} {' '.join(f'{b:08b}' for b in enc)}")
+        assert dec == i
+
+    print(f"\n    Powers of two boundaries (v=2^k-1)\n{'v':<22} {'logical_bits':<14} {'len(bytes)':<10} {'Bin'}")
+    for k in range(0, 65):
+        v = (1 << k) - 1
+        if v > MAX_V:
+            break
+        enc = bit_encode_small_unsigned([v])
+        dec = bit_decode_small_unsigned(enc, 1)[0]
+        kbits = (2 * (v + 1).bit_length()) - 1
+        print(f"{v:<22} {kbits:<14} {len(enc):<10} {' '.join(f'{b:08b}' for b in enc)}")
+        assert dec == v
+
+    print("\nBoundary length transition spot checks")
+    def logical_bits(v: int) -> int:
+        n = v + 1
+        k = n.bit_length() - 1
+        return 2 * k + 1
+    values = []
+    for k in range(0, 30):
+        base = (1 << k) - 1
+        for d in (-2,-1,0,1,2):
+            v = base + d
+            if v >= 0:
+                values.append(v)
+    values = sorted(set(v for v in values if v <= MAX_V))
+    for v in values:
+        enc = bit_encode_small_unsigned([v])
+        dec = bit_decode_small_unsigned(enc, 1)[0]
+        lb = logical_bits(v)
+        assert dec == v
+        assert (len(enc)-1)*8 < lb <= len(enc)*8
+
+    print("Random bulk test")
+    random.seed(1234)
+    arr = [random.randint(0, (1 << 32) - 1) for _ in range(500)]
+    enc = bit_encode_small_unsigned(arr)
+    dec = bit_decode_small_unsigned(enc, len(arr))
+    assert dec == arr
+    print(f"Encoded {len(arr)} values -> {len(enc)} bytes (avg {len(enc)/len(arr):.2f})")
+
+    print("Signed mapping test")
+    for i in range(-300,301):
+        enc = bit_encode_small_unsigned([encode_signed_as_unsigned(i)])
+        dec = decode_unsigned_as_signed(bit_decode_small_unsigned(enc,1)[0])
+        assert dec == i
+
+    print("All tests passed (LSB-tail gamma variant).")

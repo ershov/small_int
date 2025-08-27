@@ -1,16 +1,6 @@
 #!/usr/bin/env python3
 """
 Comparison test harness for small integer encodings.
-
-Encoders compared (order fixed):
-  1. small_int8.bit_encode_small_unsigned
-  2. small_int4.bit_encode_small_unsigned
-  3. small_int4_rle1.bit_encode_small_unsigned
-  4. small_int1.bit_encode_small_unsigned
-
-Outputs tabular sections with columns:
-  Array | For each encoder: <len> <hex-bytes>
-
 """
 from __future__ import annotations
 
@@ -19,16 +9,24 @@ from small_int8_proto import bit_encode_small_unsigned as enc8proto
 from small_int8_wt import bit_encode_small as enc8wt
 from small_int4 import bit_encode_small_unsigned as enc4
 from small_int4_rle1 import bit_encode_small_unsigned as enc4rle1
-from small_int1 import bit_encode_small_unsigned as enc1
+from small_int2 import bit_encode_small_unsigned as enc2
+# from small_int1_elias_g import bit_encode_small_unsigned as enc1eg
+from small_int1_elias_d import bit_encode_small_unsigned as enc1ed
+from small_int1_elias_d2 import bit_encode_small_unsigned as enc1ed2
+# from small_int1_elias_o import bit_encode_small_unsigned as enc1eo
 
 # Keep encoder list in required order
 ENCODERS = [
-    ("8bit", enc8),
-    ("8proto", enc8proto),
     ("8wt", enc8wt),
+    # ("8proto", enc8proto),
+    ("8bit", enc8),
+    # ("4rle", enc4rle1),
     ("4bit", enc4),
-    ("4rle", enc4rle1),
-    ("2bit", enc1),
+    ("2bit", enc2),
+    # ("1eliasG", enc1eg),
+    ("1eliasD", enc1ed),
+    ("1eliasD2", enc1ed2),
+    # ("1eliasO", enc1eo),
 ]
 
 def truncate(s: str, max_len: int) -> str:
@@ -88,6 +86,10 @@ if __name__ == "__main__":
     import random
     random.seed(876543)
 
+    # Sort arrays by length then sum then lexicographically.
+    def sort_arrays(arr: list[list[int]]) -> list[list[int]]:
+        return sorted(arr, key=lambda x: (len(x), sum(x), x))
+
     print_header("Single numbers")
     for n in range(0, 151):
         print_row([n])
@@ -103,33 +105,43 @@ if __name__ == "__main__":
     # print_row([(1 << 64) - 1]*4, full=False)
 
     print_header("Array: rather small random numbers")
-    for _ in range(20):
-        row = [random.randint(0, 1 << random.randint(0, 1 << random.randint(0, 5))) for _ in range(10)];
+    for row in sort_arrays([
+            [random.randint(0, 1 << random.randint(0, 1 << random.randint(0, 5))) for _ in range(10)]
+            for _ in range(20)]):
         print_row(row, full=True)
 
     print_header("Array: rather bigger random numbers")
-    for _ in range(20):
-        row = [random.randint(0, 1 << random.randint(0, 32)) for _ in range(10)];
+    for row in sort_arrays([
+            [random.randint(0, 1 << random.randint(0, 32)) for _ in range(10)]
+            for _ in range(20)]):
         print_row(row, full=True)
 
     print_header("Arrays of small numbers")
     for k in range(1, 21):
         print_row(list(range(k)))
 
-    print_header("Mixed number arrays")
-    for k in range(1, 11):
-        arr = [*sum(zip(
+    print_header("Arrays of mixed numbers")
+    for k in range(1, 16):
+        row = [*sum(zip(
+                list(range(k)),
+                [((1 << 19)-1) * (n+1) for n in range(k)]), ())]
+        print_row(row, full=True)
+
+    print_header("Mixed random number arrays")
+    for row in sort_arrays([
+            [*sum(zip(
                 [int(random.paretovariate(2)) for _ in range(k)],
                 [random.randint(0, random.getrandbits(random.randint(0, 32))) for _ in range(k)]), ())]
-        print_row(arr, full=True)
-        arr = [*sum(zip(
+            for k in range(1, 11)] + [
+            [*sum(zip(
                 [int(random.paretovariate(2)) for _ in range(k)],
                 [random.getrandbits(random.randint(0, 32)) for _ in range(k)]), ())]
-        print_row(arr, full=True)
+            for k in range(1, 11)]):
+        print_row(row, full=True)
 
-    print_header("Pattern arrays [0,0,big,small,big,mediumsmall,medium]")
-    for _ in range(30):
-        arr = [0,
+    print_header("Pattern random arrays0 [0,0,big,small,big,mediumsmall,medium]")
+    for row in sort_arrays([
+            [0,
                0,
                abs(int(random.gauss(mu=100000, sigma=100000))),
                random.randint(0, 8),
@@ -137,4 +149,18 @@ if __name__ == "__main__":
                int(random.expovariate(0.05)),
                int(4096 * random.paretovariate(2)),
                ]
-        print_row(arr, full=True)
+            for _ in range(30)]):
+        print_row(row, full=True)
+
+    print_header("Pattern random arrays1 [1,1,big,small,big,mediumsmall,medium]")
+    for row in sort_arrays([
+            [1,
+               1,
+               abs(int(random.gauss(mu=100000, sigma=100000))),
+               random.randint(0, 8),
+               abs(int(random.gauss(mu=100000, sigma=100000))),
+               int(random.expovariate(0.05)),
+               int(4096 * random.paretovariate(2)),
+               ]
+            for _ in range(30)]):
+        print_row(row, full=True)
