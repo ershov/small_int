@@ -46,15 +46,38 @@ def encode_all(arr: list[int]):
         out.append((name, len(data), hex_dump(data)))
     return out
 
+def n_bits(n: int) -> int:
+    "Bit length of a single integer."
+    # return n.bit_length() if n != 0 else 1
+    return n.bit_length()
+
+def array_bit_length(arr: list[int]) -> int:
+    "Cumulative bit length of all integers in the array."
+    return sum(n_bits(n) for n in arr)
+
+def array_byte_length_min(arr: list[int]) -> int:
+    "Byte length of the array if all elements are bit-packed."
+    return (array_bit_length(arr) + 7) // 8
+
+def array_byte_length_max(arr: list[int]) -> int:
+    "Byte length of the array if all elements are byte-packed."
+    return sum((n_bits(n) + 7) // 8 for n in arr)
+
+def sort_arrays(arr: list[list[int]]) -> list[list[int]]:
+    "Sort arrays by expected comptessed size."
+    # return sorted(arr, key=lambda x: (len(x), array_bit_length(x), sum(x), x))
+    return sorted(arr, key=lambda x: (array_byte_length_min(x), array_byte_length_max(x), array_bit_length(x), sum(x), len(x), x))
+
+HEADER = " | ".join(f" {name:<9}" for name, _ in [("bits",0), ("bytes_min",0), ("bytes_max",0)] + ENCODERS)
+
 def print_header(title: str):
     # print(f"\n=== {title} ===")
     # encoder_headers = " | ".join(f"   {name:<20} (len: hex)" for name, _ in ENCODERS)
     # print(f"{'Array':<40} | {encoder_headers}")
     # print("-" * (40 + 3 + len(encoder_headers)))
-    encoder_headers = " | ".join(f" {name:<9}" for name, _ in ENCODERS)
     title = f"=== {title} ==="
-    print(f"\n{title:<80} | {encoder_headers}")
-    print("-" * (80 + 3 + len(encoder_headers)))
+    print(f"\n{title:<80} | {HEADER}")
+    print("-" * (80 + 3 + len(HEADER)))
 
 def print_row(arr: list[int], full: bool = True):
     # encs = encode_all(arr)
@@ -77,7 +100,9 @@ def print_row(arr: list[int], full: bool = True):
     else:
         row = truncate(row, 78)
     row = f"{row:<80} : "
-    pieces = []
+    pieces = [f"{length:>5}" for length in (array_bit_length(arr),
+                                           array_byte_length_min(arr),
+                                           array_byte_length_max(arr))]
     for name, length, hx in encs:
         pieces.append(f"{length:>5}")
     print(row + " : ".join(f"{p:<10}" for p in pieces))
@@ -85,10 +110,6 @@ def print_row(arr: list[int], full: bool = True):
 if __name__ == "__main__":
     import random
     random.seed(876543)
-
-    # Sort arrays by expected comptessed size.
-    def sort_arrays(arr: list[list[int]]) -> list[list[int]]:
-        return sorted(arr, key=lambda x: (len(x), sum([n.bit_length() for n in x]), sum(x), x))
 
     print_header("Single numbers")
     for n in range(0, 151):

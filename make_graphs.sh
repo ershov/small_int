@@ -17,7 +17,9 @@ extract_columns() {
 }
 
 max() {
-    perl -nE 'for (split) { $_ > $x and $x=$_ } END { say 0+$x }' "$@"
+    # perl -nE 'for (split) { $_ > $x and $x=$_ } END { say 0+$x }' "$@"
+    # Remove the first column (number of bits) before computing max
+    perl -nE 'for (splice(@{[split]},1)) { $_ > $x and $x=$_ } END { say 0+$x }' "$@"
 }
 
 count_items() { echo $#; }
@@ -34,7 +36,7 @@ idx_of() {
 }
 
 ALL_COLS=$(extract_columns)
-WANT_COLS="8wt 8bit 4bit 2bit 1eliasD 1eliasD2"
+WANT_COLS="8wt 4bit 1eliasD 1eliasD2"
 N_COLS=$(count_items $WANT_COLS)
 
 PALETTE="$(perl -E '
@@ -87,9 +89,12 @@ plot_graph() {
     if [[ "$bytes" -gt 0 ]]; then
         local PLOT_BYTES=1
         local YTICS="set ytics 0,$bytes"
-        local XAXIS="(\$0 / 8.0 * $bytes):"
+        # local XAXIS="(\$0 / 8.0 * $bytes):"
+        local XAXIS="(\$1 / 8.0):"
+        # local XAXIS=""
     else
-        local PLOT_BYTES=""
+        local PLOT_BYTES=1
+        # [[ "$bytes" -lt 0 ]] && PLOT_BYTES=1
         local YTICS="set ytics 0,1"
         local XAXIS=""
         local bytes=1
@@ -112,7 +117,12 @@ plot_graph() {
     done
 
     if [[ -n "$PLOT_BYTES" ]]; then
-        PLOTS="$PLOTS"'floor(0.9999+x/'"$bytes"')*'"$bytes"' ls 99 title "minimal whole bytes"'
+        # PLOTS="$PLOTS"'floor(0.9999+x/'"$bytes"')*'"$bytes"' ls 99 title "minimal whole bytes"'
+        PLOTS="$PLOTS"' "" using '"$XAXIS"'2 with lines ls 98 notitle'
+        PLOTS="$PLOTS"', "" using '"$XAXIS"'3 with lines ls 99 notitle'
+        # Reverse order to have "minimal bits" line drawn on top of "minimal whole bytes" but displayed above in legend
+        PLOTS="$PLOTS"', "" using (NaN):(NaN) with lines ls 99 title "minimal whole bytes"'
+        PLOTS="$PLOTS"', "" using (NaN):(NaN) with lines ls 98 title "minimal bits"'
     else
         PLOTS="${PLOTS%, }"  # remove trailing comma
     fi
@@ -125,6 +135,7 @@ set grid;
 set key left reverse Left;
 '"$PALETTE"'
 set style line 99 lc rgb "#000000" lw 0.7;
+set style line 98 lc rgb "#A0A0A0" lw 1.5;
 set terminal pngcairo size 1200,800 noenhanced font "Verdana,10";
 set output "'"$name"'.png";
 plot [0:] [0:] '"$PLOTS"';
