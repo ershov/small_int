@@ -368,9 +368,9 @@
 	</g>
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
-	<path stroke='rgb(213,   0,   0)'  d='M52.50,45.01 L88.00,45.01 M38.50,722.02 L119.96,675.77 L201.43,629.52 L282.89,583.27 L364.35,537.02 L445.82,490.77
-		L527.28,444.52 L608.75,398.27 L690.21,352.02 L771.67,305.77 L853.14,259.52 L934.60,213.27 L1016.06,167.02 L1097.53,120.77
-		L1178.99,74.53  '/></g>
+	<path stroke='rgb(213,   0,   0)'  d='M52.50,45.01 L88.00,45.01 M38.50,721.67 L119.96,675.42 L201.43,629.17 L282.89,582.92 L364.35,536.67 L445.82,490.42
+		L527.28,444.17 L608.75,397.92 L690.21,351.67 L771.67,305.43 L853.14,259.18 L934.60,212.93 L1016.06,166.68 L1097.53,120.43
+		L1178.99,74.18  '/></g>
 	</g>
 	<g id="gnuplot_plot_2"  fill="none"><title>gnuplot_plot_2</title>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
@@ -379,9 +379,9 @@
 	</g>
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
-	<path stroke='rgb(  0, 165,   0)'  d='M52.50,60.01 L88.00,60.01 M38.50,731.96 L119.96,694.96 L201.43,657.96 L282.89,620.96 L364.35,574.71 L445.82,528.46
-		L527.28,482.21 L608.75,435.96 L690.21,389.71 L771.67,343.47 L853.14,297.22 L934.60,250.97 L1016.06,204.72 L1097.53,158.47
-		L1178.99,112.22  '/></g>
+	<path stroke='rgb(  0, 165,   0)'  d='M52.50,60.01 L88.00,60.01 M38.50,731.75 L119.96,694.75 L201.43,657.75 L282.89,620.75 L364.35,574.50 L445.82,528.25
+		L527.28,482.01 L608.75,435.76 L690.21,389.51 L771.67,343.26 L853.14,297.01 L934.60,250.76 L1016.06,204.51 L1097.53,158.26
+		L1178.99,112.01  '/></g>
 	</g>
 	<g id="gnuplot_plot_3"  fill="none"><title>gnuplot_plot_3</title>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
@@ -390,9 +390,9 @@
 	</g>
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
-	<path stroke='rgb(  0,   0, 255)'  d='M52.50,75.01 L88.00,75.01 M38.50,732.65 L119.96,695.65 L201.43,658.65 L282.89,621.66 L364.35,575.41 L445.82,538.41
-		L527.28,492.16 L608.75,455.16 L690.21,408.91 L771.67,362.66 L853.14,316.41 L934.60,270.16 L1016.06,223.91 L1097.53,177.66
-		L1178.99,131.41  '/></g>
+	<path stroke='rgb(  0,   0, 255)'  d='M52.50,75.01 L88.00,75.01 M38.50,732.58 L119.96,695.58 L201.43,658.59 L282.89,621.59 L364.35,575.34 L445.82,538.34
+		L527.28,492.09 L608.75,455.09 L690.21,408.84 L771.67,362.59 L853.14,316.34 L934.60,270.09 L1016.06,223.84 L1097.53,177.59
+		L1178.99,131.34  '/></g>
 	</g>
 	<g id="gnuplot_plot_4"  fill="none"><title>gnuplot_plot_4</title>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
@@ -401,9 +401,9 @@
 	</g>
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
-	<path stroke='rgb(213, 165,   0)'  d='M52.50,90.01 L88.00,90.01 M38.50,733.35 L119.96,696.35 L201.43,659.35 L282.89,613.10 L364.35,576.10 L445.82,529.85
-		L527.28,483.60 L608.75,437.35 L690.21,391.10 L771.67,344.85 L853.14,298.60 L934.60,252.35 L1016.06,206.10 L1097.53,159.86
-		L1178.99,113.61  '/></g>
+	<path stroke='rgb(213, 165,   0)'  d='M52.50,90.01 L88.00,90.01 M38.50,733.42 L119.96,696.42 L201.43,659.42 L282.89,613.17 L364.35,576.17 L445.82,529.92
+		L527.28,483.67 L608.75,437.42 L690.21,391.17 L771.67,344.92 L853.14,298.67 L934.60,252.42 L1016.06,206.17 L1097.53,159.92
+		L1178.99,113.68  '/></g>
 	</g>
 	<g id="gnuplot_plot_5"  fill="none"><title>gnuplot_plot_5</title>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
@@ -412,9 +412,9 @@
 	</g>
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
-	<path stroke='rgb(213,   0, 255)'  d='M52.50,105.01 L88.00,105.01 M38.50,734.04 L119.96,697.04 L201.43,660.04 L282.89,623.04 L364.35,576.79 L445.82,539.79
-		L527.28,493.54 L608.75,456.54 L690.21,410.30 L771.67,364.05 L853.14,317.80 L934.60,271.55 L1016.06,225.30 L1097.53,179.05
-		L1178.99,142.05  '/></g>
+	<path stroke='rgb(213,   0, 255)'  d='M52.50,105.01 L88.00,105.01 M38.50,734.25 L119.96,697.25 L201.43,660.25 L282.89,623.25 L364.35,577.00 L445.82,540.00
+		L527.28,493.75 L608.75,456.75 L690.21,410.50 L771.67,364.25 L853.14,318.00 L934.60,271.76 L1016.06,225.51 L1097.53,179.26
+		L1178.99,142.26  '/></g>
 	</g>
 	<g id="gnuplot_plot_6"  fill="none"><title>gnuplot_plot_6</title>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
@@ -423,9 +423,9 @@
 	</g>
 </g>
 <g fill="none" color="black" stroke="currentColor" stroke-width="2.50" stroke-linecap="butt" stroke-linejoin="miter">
-	<path stroke='rgb(  0, 165, 255)'  d='M52.50,120.01 L88.00,120.01 M38.50,734.73 L119.96,697.74 L201.43,660.74 L282.89,623.74 L364.35,586.74 L445.82,540.49
-		L527.28,503.49 L608.75,457.24 L690.21,420.24 L771.67,373.99 L853.14,327.74 L934.60,281.49 L1016.06,235.24 L1097.53,188.99
-		L1178.99,142.74  '/></g>
+	<path stroke='rgb(  0, 165, 255)'  d='M52.50,120.01 L88.00,120.01 M38.50,735.08 L119.96,698.08 L201.43,661.08 L282.89,624.08 L364.35,587.08 L445.82,540.83
+		L527.28,503.83 L608.75,457.59 L690.21,420.59 L771.67,374.34 L853.14,328.09 L934.60,281.84 L1016.06,235.59 L1097.53,189.34
+		L1178.99,143.09  '/></g>
 	</g>
 <g fill="none" color="white" stroke="rgb(  0, 165, 255)" stroke-width="2.00" stroke-linecap="butt" stroke-linejoin="miter">
 </g>

@@ -10,23 +10,23 @@ from small_int8_wt import bit_encode_small as enc8wt
 from small_int4 import bit_encode_small_unsigned as enc4
 from small_int4_rle1 import bit_encode_small_unsigned as enc4rle1
 from small_int2 import bit_encode_small_unsigned as enc2
-# from small_int1_elias_g import bit_encode_small_unsigned as enc1eg
+from small_int1_elias_g import bit_encode_small_unsigned as enc1eg
 from small_int1_elias_d import bit_encode_small_unsigned as enc1ed
 from small_int1_elias_d2 import bit_encode_small_unsigned as enc1ed2
-# from small_int1_elias_o import bit_encode_small_unsigned as enc1eo
+from small_int1_elias_o import bit_encode_small_unsigned as enc1eo
 
 # Keep encoder list in required order
 ENCODERS = [
     ("8wt", enc8wt),
-    # ("8proto", enc8proto),
+    ("8proto", enc8proto),
     ("8bit", enc8),
-    # ("4rle", enc4rle1),
+    ("4rle", enc4rle1),
     ("4bit", enc4),
     ("2bit", enc2),
-    # ("1eliasG", enc1eg),
+    ("1eliasG", enc1eg),
     ("1eliasD", enc1ed),
     ("1eliasD2", enc1ed2),
-    # ("1eliasO", enc1eo),
+    ("1eliasO", enc1eo),
 ]
 
 def truncate(s: str, max_len: int) -> str:
@@ -86,9 +86,9 @@ if __name__ == "__main__":
     import random
     random.seed(876543)
 
-    # Sort arrays by length then sum then lexicographically.
+    # Sort arrays by expected comptessed size.
     def sort_arrays(arr: list[list[int]]) -> list[list[int]]:
-        return sorted(arr, key=lambda x: (len(x), sum(x), x))
+        return sorted(arr, key=lambda x: (len(x), sum([n.bit_length() for n in x]), sum(x), x))
 
     print_header("Single numbers")
     for n in range(0, 151):
