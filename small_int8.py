@@ -62,9 +62,6 @@ def bit_decode_small_unsigned(data: bytes, count: int) -> list[int]:
 
 from zigzag import encode_signed_as_unsigned, decode_unsigned_as_signed
 
-###############################################################################
-# Tests
-
 if __name__ == "__main__":
     import random
     random.seed(876543)

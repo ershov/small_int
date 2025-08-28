@@ -8,6 +8,7 @@
 # bit packing inside bytes. Mapping v>=0 -> n=v+1 as usual.
 #
 # Encoding steps (modified):
+#   Small values up to INITIAL_MAX are encoded directly in 1 bit + value:
 #   n = v + 1
 #   N = bit_length(n)
 #   L = bit_length(N) - 1
@@ -20,10 +21,8 @@
 
 from typing import List
 
-
 INITIAL_BITS = 1  # Initial bits directly encoded (for small values). Reasonable: 1, 2, 3.
 INITIAL_MAX = (1 << INITIAL_BITS) - 1  # Max value for initial
-
 
 def bit_encode_small_unsigned(a: List[int]) -> bytes:
     out = bytearray([0])
@@ -49,20 +48,15 @@ def bit_encode_small_unsigned(a: List[int]) -> bytes:
             emit_bits_lsb((v << 1) | 1, (INITIAL_BITS + 1))  # Directly encode small values
             continue
         v = v - INITIAL_MAX + 1  # Adjust for initial direct encoding
-        N = v.bit_length()
-        L = N.bit_length() - 1
-        for _ in range(L):  # unary zeros
-            emit_bit(0)
-        emit_bit(1)  # delimiter for N
-        if L:
-            emit_bits_lsb(N & ((1 << L) - 1), L)  # tail of N LSB-first
-        if N > 1:
-            emit_bits_lsb(v & ((1 << (N - 1)) - 1), N - 1)  # tail of n
+        bitlen = v.bit_length()
+        bitlenlen = bitlen.bit_length() - 1
+        emit_bits_lsb(1 << bitlenlen, bitlenlen + 1)  # unary zeros and delimiter
+        emit_bits_lsb(bitlen, bitlenlen)  # tail of length. length can be zero
+        emit_bits_lsb(v, bitlen - 1)  # tail of value. length can be zero
 
     if bit_pos == 0 and len(out) > 1:
         out.pop()
     return bytes(out)
-
 
 def bit_decode_small_unsigned(data: bytes, count: int) -> List[int]:
     if count < 0:
@@ -85,34 +79,28 @@ def bit_decode_small_unsigned(data: bytes, count: int) -> List[int]:
             byte_index += 1
         return b
 
+    def read_bits_lsb(n_bits: int) -> int:
+        ret = 0
+        for i in range(n_bits):
+            ret |= read_bit() << i
+        return ret
+
     while len(res) < count:
-        L = 0
-        while True:  # unary zeros for L
-            bit = read_bit()
-            if bit == 0:
-                L += 1
-                if L > 64:
-                    raise ValueError("Delta code too long or malformed")
-            else:
-                break
-        if L == 0:
-            n = 0
-            for shift in range(INITIAL_BITS):
-                n |= read_bit() << shift
+        bitlenlen = 0
+        while read_bit() == 0:
+            bitlenlen += 1
+            if bitlenlen > 64:
+                raise ValueError("Unary code too long or malformed")
+        if bitlenlen == 0:
+            n = read_bits_lsb(INITIAL_BITS)  # Directly encoded small value
         else:
-            tailN = 0
-            for i in range(L):  # LSB-first bits of N's tail
-                tailN |= read_bit() << i
-            N = (1 << L) | tailN
-            tail = 0
-            for i in range(N - 1):  # LSB-first bits of n's tail
-                tail |= read_bit() << i
-            n = ((1 << (N - 1)) | tail) + INITIAL_MAX - 1
+            bitlen = ((1 << bitlenlen) | read_bits_lsb(bitlenlen)) - 1
+            n = ((1 << bitlen) | read_bits_lsb(bitlen)) + INITIAL_MAX - 1
         res.append(n)
     return res
 
 ###############################################################################
-# Tests (similar structure, lengths still 2*L + N logical bits)
+# Tests
 
 from zigzag import encode_signed_as_unsigned, decode_unsigned_as_signed
 

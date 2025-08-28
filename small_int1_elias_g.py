@@ -15,7 +15,6 @@
 
 from typing import List
 
-
 def bit_encode_small_unsigned(a: List[int]) -> bytes:
     out = bytearray([0])
     bit_pos = 0
@@ -36,14 +35,10 @@ def bit_encode_small_unsigned(a: List[int]) -> bytes:
     for v in a:
         if v < 0:
             raise ValueError("Value must be non-negative")
-        n = v + 1
-        k = n.bit_length() - 1
-        for _ in range(k):  # unary zeros
-            emit_bit(0)
-        emit_bit(1)  # delimiter (implicit leading 1 of n)
-        if k:
-            tail = n & ((1 << k) - 1)
-            emit_bits_lsb(tail, k)  # LSB-first tail
+        v = v + 1
+        bitlen = v.bit_length() - 1
+        emit_bits_lsb(1 << bitlen, bitlen + 1)  # unary zeros and delimiter
+        emit_bits_lsb(v, bitlen)  # LSB-first tail. length can be zero
 
     if bit_pos == 0 and len(out) > 1:
         out.pop()
@@ -71,28 +66,27 @@ def bit_decode_small_unsigned(data: bytes, count: int) -> List[int]:
             byte_index += 1
         return b
 
+    def read_bits_lsb(n_bits: int) -> int:
+        ret = 0
+        for i in range(n_bits):
+            ret |= read_bit() << i
+        return ret
+
     while len(res) < count:
-        k = 0
-        while True:  # unary zeros
-            bit = read_bit()
-            if bit == 0:
-                k += 1
-                if k > 64:
-                    raise ValueError("Gamma code too long or malformed")
-            else:
-                break  # delimiter 1
-        if k == 0:
+        bitlen = 0
+        while read_bit() == 0:
+            bitlen += 1
+            if bitlen > 64:
+                raise ValueError("Unary code too long or malformed")
+        if bitlen == 0:
             n = 1
         else:
-            tail = 0
-            for i in range(k):  # LSB-first reconstruction
-                tail |= read_bit() << i
-            n = (1 << k) | tail
+            n = (1 << bitlen) | read_bits_lsb(bitlen)
         res.append(n - 1)
     return res
 
 ###############################################################################
-# Tests (updated expected bit lengths accordingly; logical length still 2k+1)
+# Tests
 
 from zigzag import encode_signed_as_unsigned, decode_unsigned_as_signed
 

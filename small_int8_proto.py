@@ -7,7 +7,6 @@
 #      - Bit 7 (0x80) is the continuation flag: set if another byte follows.
 #      - No +1 / -1 biasing between bytes (unlike the custom small_int8 scheme).
 
-
 def bit_encode_small_unsigned(a: list[int]) -> bytes:
     """Encode an array of small non-negative integers (protobuf varint)."""
     out = bytearray()
@@ -55,9 +54,6 @@ def bit_decode_small_unsigned(data: bytes, count: int) -> list[int]:
 # Tests
 
 from zigzag import encode_signed_as_unsigned, decode_unsigned_as_signed
-
-###############################################################################
-# Tests
 
 if __name__ == "__main__":
     import random

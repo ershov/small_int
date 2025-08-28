@@ -36,7 +36,6 @@
 
 from typing import List
 
-
 def bit_encode_small_unsigned(a: List[int]) -> bytes:
     out = bytearray([0])
     bit_pos = 0
